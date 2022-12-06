@@ -1,0 +1,63 @@
+---
+- name: install k8s
+  include_tasks: install.yml
+  tags:
+    - install
+    - upgrade
+
+- name: configure OS
+  include_tasks: configure_os.yml
+  tags:
+    - install
+
+- name: discover node status
+  include_tasks: discover.yml
+
+- debug: var=node
+- debug: var=cluster
+
+- name: create the cluster
+  include_tasks: init.yml
+  when:
+    - node == "master"
+    - cluster != "initialized"
+  tags:
+    - init
+
+- debug: var=node_ip
+- debug:
+    var: master_ip
+  when:
+    - node == "slave"
+- debug: var=token
+
+- name: generate short-lived join token
+  include_tasks: join_token.yml
+  when:
+    - node == "master"
+
+- name: set token from master node
+  set_fact:
+    join_cmd: "{{ hostvars['node00']['join_cmd'] }}"
+  when:
+    - node == "slave"
+
+- name: join the cluster
+  include_tasks: join.yml
+  when:
+    - node == "slave"
+    - cluster != "joined"
+    - join_cmd is defined and join_cmd != ""
+  tags:
+    - join
+
+- name: discover node status again once everyone has joined
+  include_tasks: discover.yml
+
+- name: show cluster status
+  shell: kubectl get nodes
+  register: nodes_out
+  when:
+    - node == "master"
+
+- debug: var=nodes_out

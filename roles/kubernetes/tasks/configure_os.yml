@@ -1,0 +1,22 @@
+- name: discover swap status
+  ansible.builtin.shell: cat /proc/swaps | wc -l
+  register: swap_out
+
+- name: disable swap if enabled
+  ansible.builtin.shell: |
+    dphys-swapfile swapoff
+    dphys-swapfile uninstall
+    systemctl disable dphys-swapfile
+  when: swap_out.stdout != "1"
+
+- name: enable memory cgroup
+  ansible.builtin.lineinfile:
+    path: /boot/cmdline.txt
+    regexp: '^(.*) rootwait$'
+    line: '\1 rootwait cgroup_enable=memory cgroup_memory=1'
+    backrefs: yes
+  register: cmdline_modified
+
+- name: reboot host
+  ansible.builtin.reboot:
+  when: cmdline_modified.changed

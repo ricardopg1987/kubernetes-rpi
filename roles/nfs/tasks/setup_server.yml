@@ -1,0 +1,36 @@
+- name: install Server Packages
+  apt:
+    name: "{{ nfs_server_packages }}"
+    state: present
+  tags:
+    - install
+
+- name: ensure mount directory exists
+  file:
+    path: "{{ server_mount_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0777
+  tags:
+    - configure
+
+- name: update /etc/exports
+  lineinfile:
+    path: /etc/exports
+    insertafter: EOF
+    line: "{{ server_mount_dir }} *(rw,sync,no_subtree_check,all_squash,anonuid=0,anongid=0)"
+  tags:
+    - configure
+
+- name: reload NFS daemon
+  shell: exportfs -ar
+  tags:
+    - configure
+
+- name: enable NFS services at boot
+  shell: |
+    systemctl enable rpcbind
+    systemctl enable nfs-kernel-server
+  tags:
+    - configure
