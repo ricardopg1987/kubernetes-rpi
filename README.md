@@ -1,4 +1,4 @@
-# rpi-k8s-ansible
+# rpi-k3s-ansible
 Raspberry PI's running Kubernetes deployed with Ansible
 
 Masters:
@@ -9,8 +9,7 @@ Workers:
 - rPi 3b x4
 
 CNI:
-- Weave (default)
-- Flannel
+- Calico
 
 # Preparing to install
 ## Preparing an SD card on Linux
