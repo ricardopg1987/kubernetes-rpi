@@ -4,7 +4,7 @@ Raspberry PI's running Kubernetes deployed with Ansible
 Control plane, worker, etcd:
 - rPi 3b+ x1
 - rPi 3b+ x2
-- rPi 3b x3
+- rPi 3b+ x3
 
 CNI:
 - Calico
