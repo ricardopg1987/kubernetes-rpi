@@ -1,27 +1,24 @@
 # rpi-k3s-ansible
 Raspberry PI's running Kubernetes deployed with Ansible
 
-Masters:
+Control plane, worker, etcd:
 - rPi 3b+ x1
-
-Workers:
 - rPi 3b+ x2
-- rPi 3b x4
+- rPi 3b x3
 
 CNI:
 - Calico
 
-# Preparing to install
+# Install Raspbian at each node
 ## Preparing an SD card on Linux
 ```
-# Write the image to the SD card, latest verified is 2021-05-07
-# Sourced the image from here: https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/
+# Write the image to the SD card
+# Select other images -> Raspbian for ARM processor (https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-09-26/2022-09-22-raspios-bullseye-arm64.img.xz/)
 
 # Linux
 $ sudo dd if=YYYY-MM-DD-raspios-buster-arm64-lite.img of=/dev/sdX bs=16M status=progress
 
-# Windows
-# I use balenaEtcher, Win32DiskImager is another option
+# I use Raspberry Pi Imager
 
 # Provision wifi settings on first boot
 $ cat bootstrap/wpa_supplicant.conf
