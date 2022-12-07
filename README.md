@@ -56,7 +56,7 @@ sudo umount /media/<user>/rootfs
 ```
 
 ## Updating cluster.yml to match your environment
-This is where there individual rPi's are set to be a master or a slave.  
+This is where there individual rPi's are set to HA embedded etcd database.  
 I have not changed any passwords or configured SSH keys as this cannot be easily done with a headless rPi setup.  
 I am currently using DHCP static assignment to ensure each PI's MAC address is given the same IP address.  
 Update the file as required for your specific setup.
@@ -178,7 +178,7 @@ sudo kubeadm upgrade apply v1.15.1
 
 ...
 
-[upgrade/successful] SUCCESS! Your cluster was upgraded to "v1.15.1". Enjoy!
+[upgrade/successful] SUCCESS! Your cluster was upgraded.
 
 [upgrade/kubelet] Now that your control plane is upgraded, please proceed with upgrading your kubelets if you haven't already done so.
 ```
