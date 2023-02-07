@@ -1,5 +1,5 @@
-# rpi-k3s-ansible
-Raspberry PI's running Kubernetes deployed with Ansible
+# Abstract
+This repository contains the necessary steps to deploy a high-availability Kubernetes cluster for deploying the micro ONOS SDN controller as a set of microservices. Raspberry PI's running Kubernetes deployed with Ansible
 
 Control plane, worker, etcd:
 - rPi 3b+ x1
