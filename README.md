@@ -223,6 +223,35 @@ source ~/.profile
 go version
 ```
 
+Install KIND
+```
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.17.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+```
+
+Install Helm
+```
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+```
+
+Install make, python-pip and reuse
+```
+sudo apt install make
+apt-get install python3-pip -y
+pip3 install --user reuse
+```
+
+Clone helmit repo
+```
+git clone https://github.com/onosproject/helmit.git
+cd helmit
+make deps
+GO111MODULE=on go get github.com/onosproject/helmit/cmd/helmit
+```
+
 # Set up an HA Kubernetes Cluster Using Keepalived and HAproxy
 A highly available Kubernetes cluster ensures your applications run without outages which is required for production. In this connection, there are plenty of ways for you to choose from to achieve high availability. https://kubesphere.io/docs/v3.3/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-keepalived-haproxy/
 
