@@ -15,8 +15,6 @@ Worker:
 CNI:
 - Calico
 
-
-
 # Install Raspbian at each node
 ## Preparing an SD card on Linux
 ```
@@ -210,4 +208,5 @@ A highly available Kubernetes cluster ensures your applications run without outa
 
 This tutorial demonstrates how to configure Keepalived and HAproxy for load balancing and achieve high availability. The steps are listed as below:
 
+![This is an image](https://kubesphere.io/images/docs/v3.3/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-keepalived-haproxy/architecture-ha-k8s-cluster.png)
 
