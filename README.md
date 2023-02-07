@@ -207,9 +207,20 @@ ansible-playbook -i cluster.yml site.yml --tags upgrade,kubernetes
 ```
 
 # Install control plane nodes
-To install control plane nodes this implementation apply the vagrant configuration file provided by this repositories.
+To install control plane nodes this implementation apply the vagrant configuration file provided by this repository.
 ```
-cd vagrant-kube113.6/
+cd vagrant-kube113.6
+vagrant up
+vagrant ssh master1
+```
+Once vagrant deploy all virtualbox machines, we most to acces to each one to install all the packages required.
+```
+vagrant ssh master1
+wget -c https://golang.org/dl/go1.16.3.linux-amd64.tar.gz -O - | sudo tar -xz -C /usr/local
+nano ~/.profile
+export PATH=$PATH:/usr/local/go/bin
+source ~/.profile
+go version
 ```
 
 # Set up an HA Kubernetes Cluster Using Keepalived and HAproxy
