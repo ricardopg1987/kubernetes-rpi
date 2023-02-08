@@ -206,10 +206,12 @@ kube_version: "1.15.1-00"
 ansible-playbook -i cluster.yml site.yml --tags upgrade,kubernetes
 ```
 
-# Install control plane nodes
-To install control plane nodes this implementation apply the vagrant configuration file provided by this repository.
+# Install control plane for all nodes
+To install control plane nodes, this implementation apply the vagrant configuration file provided in this repository.
+In this file we can configure the nodes that we want to deploy. In this case we are going to deploy 3 master nodes and 3 worker nodes. The required packages are installed in each node through the
+**bootstrap.sh** file.
 ```
-cd vagrant-kube113.6
+cd vagrantfile
 vagrant up
 vagrant ssh master1
 ```
@@ -259,5 +261,149 @@ This tutorial demonstrates how to configure Keepalived and HAproxy for load bala
 The cluster architecture is shown in the Figure below:
 ![This is an image](https://kubesphere.io/images/docs/v3.3/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-keepalived-haproxy/architecture-ha-k8s-cluster.png)
 
+## Prerequisites
+Install keepalived and haproxy on all nodes
+```
+sudo apt-get install keepalived haproxy -y
+```
+Configure HAproxy on all nodes
+```
+sudo nano /etc/haproxy/haproxy.cfg
+```
+Modify the following lines according to your environment:
+```
+global
+    log /dev/log  local0 warning
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
 
+   stats socket /var/lib/haproxy/stats
 
+defaults
+  log global
+  option  httplog
+  option  dontlognull
+        timeout connect 5000
+        timeout client 50000
+        timeout server 50000
+
+frontend kube-apiserver
+  bind *:6443
+  mode tcp
+  option tcplog
+  default_backend kube-apiserver
+
+backend kube-apiserver
+    mode tcp
+    option tcplog
+    option tcp-check
+    balance roundrobin
+    default-server inter 10s downinter 5s rise 2 fall 2 slowstart 60s maxconn 250 maxqueue 256 weight 100
+    server kube-apiserver-1 172.16.0.4:6443 check # Replace the IP address with your own.
+    server kube-apiserver-2 172.16.0.5:6443 check # Replace the IP address with your own.
+    server kube-apiserver-3 172.16.0.6:6443 check # Replace the IP address with your own.
+```
+Save the file and run the following command to restart HAproxy.
+```
+sudo systemctl restart haproxy
+```
+Configure Keepalived on all nodes
+```
+sudo nano /etc/keepalived/keepalived.conf
+```
+Add the following lines to the file, according to your environment:
+```
+global_defs {
+  notification_email {
+  }
+  router_id LVS_DEVEL
+  vrrp_skip_check_adv_addr
+  vrrp_garp_interval 0
+  vrrp_gna_interval 0
+}
+
+vrrp_script chk_haproxy {
+  script "killall -0 haproxy"
+  interval 2
+  weight 2
+}
+
+vrrp_instance haproxy-vip {
+  state BACKUP
+  priority 100
+  interface eth0                       # Network card
+  virtual_router_id 60
+  advert_int 1
+  authentication {
+    auth_type PASS
+    auth_pass 1111
+  }
+  unicast_src_ip 172.16.0.2      # The IP address of this machine
+  unicast_peer {
+    172.16.0.3                         # The IP address of peer machines
+  }
+
+  virtual_ipaddress {
+    172.16.0.10/24                  # The VIP address
+  }
+
+  track_script {
+    chk_haproxy
+  }
+}
+```
+Save the file and run the following command to restart Keepalived.
+```
+sudo systemctl restart keepalived
+```
+## Use KubeKey to Create a Kubernetes Cluster
+Download KubeKey from its GitHub Release Page or use the following command directly.
+```
+curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.2 sh -
+chmod +x kk
+./kk create config --with-kubesphere v3.3.1 --with-kubernetes v1.22.12
+```
+### Deploy KubeSphere and Kubernetes
+After you run the commands above, a configuration file config-sample.yaml will be created. Edit the file to add machine information, configure the load balancer and more.
+```
+...
+spec:
+  hosts:
+  - {name: master1, address: 172.16.0.4, internalAddress: 172.16.0.4, user: root, password: Testing123}
+  - {name: master2, address: 172.16.0.5, internalAddress: 172.16.0.5, user: root, password: Testing123}
+  - {name: master3, address: 172.16.0.6, internalAddress: 172.16.0.6, user: root, password: Testing123}
+  - {name: worker1, address: 172.16.0.7, internalAddress: 172.16.0.7, user: root, password: Testing123}
+  - {name: worker2, address: 172.16.0.8, internalAddress: 172.16.0.8, user: root, password: Testing123}
+  - {name: worker3, address: 172.16.0.9, internalAddress: 172.16.0.9, user: root, password: Testing123}
+  roleGroups:
+    etcd:
+    - master1
+    - master2
+    - master3
+    control-plane:
+    - master1
+    - master2
+    - master3
+    worker:
+    - worker1
+    - worker2
+    - worker3
+  controlPlaneEndpoint:
+    domain: lb.kubesphere.local
+    address: 172.16.0.10   # The VIP address
+    port: 6443
+...
+```
+Run the following command to deploy KubeSphere and Kubernetes.
+```
+./kk create cluster -f config-sample.yaml
+```
+### Verify installation
+Run the following command to inspect the logs of installation.
+```
+kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l 'app in (ks-install, ks-installer)' -o jsonpath='{.items[0].metadata.name}') -f
+```
