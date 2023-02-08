@@ -2,20 +2,20 @@
 This repository contains the necessary steps to deploy a High-Availability Kubernetes cluster (HA) for deploying the micro ONOS SDN controller as a set of microservices. All Raspberrys are running Kubernetes as worker nodes, deployed via Ansible implementation. The control plane for HA uses vagrant and virtualbox for control plane and etcd storage. To use this repo follow the setup instructions below.  
 
 # Workflow
-Control plane and etcd:
+**Control plane and etcd:**
 - Master-1
 - Master-2
 - Master-3
 
-Worker:
+**Worker:**
 - rPi 4(ARM) x1
 - rPi 4(ARM) x2
 - rPi 4(ARM) x3
 
-CNI:
+**CNI:**
 - Calico
 
-HA Kubernetes cluster:
+**HA Kubernetes cluster:**
 - Keepalived and HAproxy
 
 # Install Raspbian at each node
