@@ -301,9 +301,9 @@ backend kube-apiserver
     option tcp-check
     balance roundrobin
     default-server inter 10s downinter 5s rise 2 fall 2 slowstart 60s maxconn 250 maxqueue 256 weight 100
-    server kube-apiserver-1 172.16.0.4:6443 check # Replace the IP address with your own.
-    server kube-apiserver-2 172.16.0.5:6443 check # Replace the IP address with your own.
-    server kube-apiserver-3 172.16.0.6:6443 check # Replace the IP address with your own.
+    server kube-apiserver-1 192.168.56.101:6443 check # Replace the IP address with your own.
+    server kube-apiserver-2 192.168.56.102:6443 check # Replace the IP address with your own.
+    server kube-apiserver-3 192.168.56.103:6443 check # Replace the IP address with your own.
 ```
 Save the file and run the following command to restart HAproxy.
 ```
@@ -371,18 +371,20 @@ After you run the commands above, a configuration file config-sample.yaml will b
 ...
 spec:
   hosts:
-  - {name: master1, address: 172.16.0.4, internalAddress: 172.16.0.4, user: root, password: Testing123}
-  - {name: master2, address: 172.16.0.5, internalAddress: 172.16.0.5, user: root, password: Testing123}
-  - {name: master3, address: 172.16.0.6, internalAddress: 172.16.0.6, user: root, password: Testing123}
-  - {name: worker1, address: 172.16.0.7, internalAddress: 172.16.0.7, user: root, password: Testing123}
-  - {name: worker2, address: 172.16.0.8, internalAddress: 172.16.0.8, user: root, password: Testing123}
-  - {name: worker3, address: 172.16.0.9, internalAddress: 172.16.0.9, user: root, password: Testing123}
+  - {name: master1, address: 192.168.56.101, internalAddress: 192.168.56.101, user: root, password: "admin"}
+  - {name: master2, address: 192.168.56.102, internalAddress: 192.168.56.102, user: root, password: "admin"}
+  - {name: master3, address: 192.168.56.103, internalAddress: 192.168.56.103, user: root, password: "admin"}
+  - {name: worker1, address: 192.168.56.111, internalAddress: 192.168.56.111, user: root, password: "admin"}
+  - {name: worker2, address: 192.168.56.112, internalAddress: 192.168.56.112, user: root, password: "admin"}
+  - {name: worker3, address: 192.168.56.113, internalAddress: 192.168.56.113, user: root, password: "admin"}
+  - {name: lb1, address: 192.168.56.121, internalAddress: 192.168.56.121, user: root, password: "admin"}
+  - {name: lb2, address: 192.168.56.122, internalAddress: 192.168.56.122, user: root, password: "admin"}
   roleGroups:
     etcd:
     - master1
     - master2
     - master3
-    control-plane:
+    control-plane: 
     - master1
     - master2
     - master3
@@ -391,8 +393,11 @@ spec:
     - worker2
     - worker3
   controlPlaneEndpoint:
+    ## Internal loadbalancer for apiservers 
+    # internalLoadbalancer: haproxy
+
     domain: lb.kubesphere.local
-    address: 172.16.0.10   # The VIP address
+    address: "192.168.56.200"
     port: 6443
 ...
 ```
