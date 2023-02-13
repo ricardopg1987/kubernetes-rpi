@@ -409,3 +409,72 @@ Run the following command to inspect the logs of installation.
 ```
 kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l 'app in (ks-install, ks-installer)' -o jsonpath='{.items[0].metadata.name}') -f
 ```
+## Setup Raspberry PI as an OpenFlow switch
+```
+# Download openvswitch
+wget http://openvswitch.org/releases/openvswitch-2.5.2.tar.gz
+# Unpack archive
+tar -xvzf openvswitch-2.5.2.tar.gz
+# Install following dependancies
+apt-get install python-simplejson python-qt4 libssl-dev python-twisted-conch automake autoconf gcc uml-utilities libtool build-essential pkg-config
+apt-get install linux-headers-3.10-3-rpi
+# Make the switch (Navigate to openvswitch-2.5.2 and enter the following commands)
+./configure --with-linux=/lib/modules/3.10-3-rpi/build
+make
+make install
+
+# Turn on openvswitch module
+cd openvswitch-2.5.2/datapath/linux
+modprobe openvswitch
+
+# Create ovs_script.sh with the following code
+#!/bin/bash
+ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock \
+ --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
+ --private-key=db:Open_vSwitch,SSL,private_key \
+ --certificate=db:Open_vSwitch,SSL,certificate \
+ --bootstrap-ca-cert=db:Open_vSwitch,SSL,ca_cert \
+ --pidfile –detach
+ovs-vsctl --no-wait init
+ovs-vswitchd --pidfile –detach
+ovs-vsctl show
+
+# Create a file for the database, which will contain the details of the switch
+touch /usr/local/etc/ovs-vswitchd.conf
+# Create the following directory
+mkdir -p /usr/local/etc/openvswitch
+# Populate the database, which will be used by the ovswitch
+./openvswitch-2.5.2/ovsdb/ovsdb-tool create /usr/local/etc/openvswitch/conf.db openvswitch-2.5.2/vswitchd/vswitch.ovsschema
+
+# Run ovs_script.sh
+
+# Add a new bridge
+ovs-vsctl add-br br0
+
+# Bind the ports to the newly added bridge
+ifconfig eth1 0 up
+ifconfig eth2 0 up
+
+# Set the interfaces up
+ifconfig eth1 0 up
+ifconfig eth2 0 up
+
+# Connect the switch to an external controller
+ovs-vsctl set-controller br0 tcp:20.0.0.7:6634
+
+# Configuring the switch to initialize as an OpenFlow switch at startup
+# Add the following bash script to the location of openvswitch-2.5.2 and rename it to main_script.sh
+#!/bin/bash
+cd openvswitch-2.5.2/datapath/linux
+modprobe openvswitch
+cd ..
+cd ..
+cd ..
+./ovs_script.sh
+ifconfig eth1 0 up
+ifconfig eth2 0 up
+
+# Then add the following line at the end of .bashrc
+sudo sh [location of main_script.sh]/main_script.sh
+```
+
