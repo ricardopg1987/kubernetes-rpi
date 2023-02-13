@@ -117,10 +117,6 @@ alias kubectl='docker run -it --rm -v ~/.kube:/.kube -v $(pwd):/pwd -w /pwd bitn
 # Run kubectl within docker
 kubectl version
 ```
-
-# Running things on the cluster!
-You can look in the README.md in the kubernetes subfolder to see a few examples of things to run!
-
 # Extra misc commands
 ```
 # Shutdown all nodes
