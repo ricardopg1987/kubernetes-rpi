@@ -1,9 +1,9 @@
  [![Apache v2 License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg)](https://github.com/ansible/awx/blob/devel/LICENSE.md)
 
 # Abstract
-This repository contains the necessary steps to implement a High-Availability Kubernetes cluster (HA) for deploying micro ONOS SDN controller as a set of microservices. We use a set of Raspberry pi as openflow switces and kubernetes workers, as well as vagrant virtual machines to implements the control plane. All Raspberrys are running as worker nodes and deployed via Ansible implementation. The control plane for HA uses vagrant and virtualbox for control plane and etcd storage. To use this repo follow the setup instructions below.  
+This repository contains the necessary steps to implement a High-Availability Kubernetes cluster (HA) for deploying micro ONOS SDN controller as a set of microservices. We use a set of Raspberry pi as openflow switces and kubernetes workers, as well as vagrant virtual machines to implements the control plane. All Raspberrys are running as worker nodes and deployed via Ansible implementation. The control plane uses vagrant and virtualbox for functionalities and storage. To use this repo follow the setup instructions below.  
 
-# Workflow
+# Resources
 **Control plane and etcd:**
 - Master-1
 - Master-2
@@ -67,10 +67,7 @@ sudo umount /media/<user>/rootfs
 ```
 
 ## Updating cluster.yml to match your environment
-This is where there individual rPi's are set to HA embedded etcd database.  
-I have not changed any passwords or configured SSH keys as this cannot be easily done with a headless rPi setup.  
-I am currently using DHCP static assignment to ensure each PI's MAC address is given the same IP address.  
-Update the file as required for your specific setup.
+The individual rPi's are configured with an HA embedded etcd database here. Since the rPi setup is headless, I haven't altered any passwords or set up SSH keys, as it's not a simple task. To ensure that each PI is given the same IP address, I'm using DHCP static assignment. You should update the file to suit your specific setup.
 
 # Install sshpass
 This is used as part of ansible connecting to the pi's over SSH with password auth
@@ -79,8 +76,10 @@ sudo apt-get install sshpass
 ```
 
 # Install Kubernetes
-## apt-get upgrade
+## Install Ansible
+
 ```
+apt-get upgrade
 ansible-playbook -i cluster.yml playbooks/upgrade.yml
 ```
 
@@ -126,7 +125,7 @@ ansible -i cluster.yml -a "shutdown -h now" all
 ansible -i cluster.yml -a "mount -a" all
 ```
 
-# Upgrading your cluster
+<!---# Upgrading your cluster
 First you need to upgrade the control plane (node00).
 The below example is an upgrade from v1.15.0 -> v1.15.1
 
@@ -198,7 +197,7 @@ kube_version: "1.15.1-00"
 
 <snip>
 ```
-
+--->
 ## Upgrade the kubeXYZ tooling
 ```
 ansible-playbook -i cluster.yml site.yml --tags upgrade,kubernetes
@@ -206,12 +205,11 @@ ansible-playbook -i cluster.yml site.yml --tags upgrade,kubernetes
 
 # Install control plane for all nodes
 To install control plane nodes, this implementation apply the vagrant configuration file provided in this repository.
-In this file we can configure the nodes that we want to deploy. In this case we are going to deploy 3 master nodes and 3 worker nodes. The required packages are installed in each node through the
+In this file we can configure the nodes that we want to deploy. In this case we are going to deploy 3 master nodes. The required packages are installed in each node through the
 **bootstrap.sh** file.
 ```
 cd vagrantfile
 vagrant up
-vagrant ssh master1
 ```
 Once vagrant deploy all virtualbox machines, we most to acces to each one to install all the packages required.
 ```
@@ -255,7 +253,7 @@ GO111MODULE=on go get github.com/onosproject/helmit/cmd/helmit
 # Set up an HA Kubernetes Cluster Using Keepalived and HAproxy
 A highly available Kubernetes cluster ensures your applications run without outages which is required for production. In this connection, there are plenty of ways for you to choose from to achieve high availability. https://kubesphere.io/docs/v3.3/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-keepalived-haproxy/
 
-This tutorial demonstrates how to configure Keepalived and HAproxy for load balancing and achieve high availability. The steps are listed as below:
+This steps describes how to configure Keepalived and HAproxy for load balancing and achieve high availability. 
 The cluster architecture is shown in the Figure below:
 ![This is an image](https://kubesphere.io/images/docs/v3.3/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-keepalived-haproxy/architecture-ha-k8s-cluster.png)
 
@@ -358,7 +356,7 @@ Save the file and run the following command to restart Keepalived.
 ```
 sudo systemctl restart keepalived
 ```
-## Use KubeKey to Create a Kubernetes Cluster
+## Use KubeKey to create a Kubernetes cluster
 Download KubeKey from its GitHub Release Page or use the following command directly.
 ```
 curl -sfL https://get-kk.kubesphere.io | VERSION=v3.0.2 sh -
@@ -478,4 +476,18 @@ ifconfig eth2 0 up
 # Then add the following line at the end of .bashrc
 sudo sh [location of main_script.sh]/main_script.sh
 ```
+
+# Setup Rancher installation
+To install rancher on one master node, access to the official documentation is recommended. 
+
+https://ranchermanager.docs.rancher.com/v2.6/pages-for-subheaders/installation-and-upgrade
+
+# References
+[Install K3s on Raspberry Pi with Ansible](https://github.com/k3s-io/k3s-ansible).
+
+[Vagrant Get Started](https://developer.hashicorp.com/vagrant/tutorials/getting-started).
+
+[Rancher Installation](https://rancher.com/docs/k3s/latest/en/installation/).
+
+[Set up an HA Kubernetes Cluster Using Keepalived and HAproxy](https://kubesphere.io/docs/v3.3/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-keepalived-haproxy/)
 
