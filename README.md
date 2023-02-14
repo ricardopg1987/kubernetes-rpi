@@ -1,7 +1,7 @@
  [![Apache v2 License](https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg)](https://github.com/ansible/awx/blob/devel/LICENSE.md)
 
 # Abstract
-This repository contains the necessary steps to implement a High-Availability Kubernetes cluster (HA) for deploying micro ONOS SDN controller as a set of microservices. We use a set of Raspberry pi as openflow switces and kubernetes workers, as well as vagrant virtual machines to implements the control plane. All Raspberrys are running as worker nodes and deployed via Ansible implementation. The control plane uses vagrant and virtualbox for functionalities and storage. To use this repo follow the setup instructions below.  
+This repository contains the necessary steps to implement a High-Availability Kubernetes cluster (HA) for deploying micro ONOS SDN controller as a set of microservices. We use a set of Raspberry pi as OpenFlow switches, Kubernetes workers, and vagrant virtual machines to implement the control plane. All Raspberrys are running as worker nodes and deployed via Ansible implementation. The control plane uses vagrant and virtualbox for functionalities and storage. To use this repo, follow the setup instructions below.  
 
 # Resources
 **Control plane and etcd:**
@@ -31,7 +31,7 @@ $ sudo dd if=YYYY-MM-DD-raspios-buster-arm64-lite.img of=/dev/sdX bs=16M status=
 
 # I use Raspberry Pi Imager
 
-# Provision wifi settings on first boot
+# Provision wifi settings on the first boot
 $ cat bootstrap/wpa_supplicant.conf
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
@@ -67,7 +67,7 @@ sudo umount /media/<user>/rootfs
 ```
 
 ## Updating cluster.yml to match your environment
-The individual rPi's are configured with an HA embedded etcd database here. Since the rPi setup is headless, I haven't altered any passwords or set up SSH keys, as it's not a simple task. To ensure that each PI is given the same IP address, I'm using DHCP static assignment. You should update the file to suit your specific setup.
+The individual rPi's are configured with an HA embedded etcd database here. Since the rPi setup is headless, I haven't altered any passwords or set up SSH keys, as it's a complex task. To ensure that each PI is given the same IP address, I'm using DHCP static assignment. You should update the file to suit your specific setup.
 
 # Install sshpass
 This is used as part of ansible connecting to the pi's over SSH with password auth
@@ -113,7 +113,7 @@ ansible-playbook -i cluster.yml playbooks/copy-kube-config.yml
 # Set an alias to make it easier
 alias kubectl='docker run -it --rm -v ~/.kube:/.kube -v $(pwd):/pwd -w /pwd bitnami/kubectl:1.21.3'
 
-# Run kubectl within docker
+# Run kubectl within the docker
 kubectl version
 ```
 # Extra misc commands
@@ -164,7 +164,7 @@ Etcd                 3.3.10    3.3.10
 
 You can now apply the upgrade by executing the following command:
 
-	kubeadm upgrade apply v1.15.1
+  kubeadm upgrade apply v1.15.1
 
 _____________________________________________________________________
 ```
@@ -186,7 +186,7 @@ sudo kubeadm upgrade apply v1.15.1
 
 [upgrade/successful] SUCCESS! Your cluster was upgraded.
 
-[upgrade/kubelet] Now that your control plane is upgraded, please proceed with upgrading your kubelets if you haven't already done so.
+[upgrade/kubelet] Now that your control plane is upgraded, please proceed with upgrading your kubelets if you still need to do so.
 ```
 
 ## Update kube_version
@@ -204,14 +204,14 @@ ansible-playbook -i cluster.yml site.yml --tags upgrade,kubernetes
 ```
 
 # Install control plane for all nodes
-To install control plane nodes, this implementation apply the vagrant configuration file provided in this repository.
-In this file we can configure the nodes that we want to deploy. In this case we are going to deploy 3 master nodes. The required packages are installed in each node through the
+To install the control plane nodes, this implementation applies the vagrant configuration file provided in this repository.
+In this file, we can configure the nodes. In this case, we are going to deploy three master nodes. The required packages are installed in each node through the
 **bootstrap.sh** file.
 ```
 cd vagrantfile
 vagrant up
 ```
-Once vagrant deploy all virtualbox machines, we most to acces to each one to install all the packages required.
+Once vagrant deploys all VirtualBox machines, we must access to each one to install all the packages required.
 ```
 vagrant ssh master1
 wget -c https://golang.org/dl/go1.16.3.linux-amd64.tar.gz -O - | sudo tar -xz -C /usr/local
@@ -253,7 +253,7 @@ GO111MODULE=on go get github.com/onosproject/helmit/cmd/helmit
 # Set up an HA Kubernetes Cluster Using Keepalived and HAproxy
 A highly available Kubernetes cluster ensures your applications run without outages which is required for production. In this connection, there are plenty of ways for you to choose from to achieve high availability. https://kubesphere.io/docs/v3.3/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-keepalived-haproxy/
 
-This steps describes how to configure Keepalived and HAproxy for load balancing and achieve high availability. 
+This step describes how to configure Keepalived and HAproxy for load balancing and achieve high availability. 
 The cluster architecture is shown in the Figure below:
 ![This is an image](https://kubesphere.io/images/docs/v3.3/installing-on-linux/high-availability-configurations/set-up-ha-cluster-using-keepalived-haproxy/architecture-ha-k8s-cluster.png)
 
@@ -478,7 +478,7 @@ sudo sh [location of main_script.sh]/main_script.sh
 ```
 
 # Setup Rancher installation
-To install rancher on one master node, access to the official documentation is recommended. 
+To install Rancher on a single master node, access the official documentation. 
 
 https://ranchermanager.docs.rancher.com/v2.6/pages-for-subheaders/installation-and-upgrade
 
