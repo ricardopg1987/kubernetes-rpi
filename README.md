@@ -2,6 +2,7 @@
 
 # Abstract
 This repository contains the necessary steps to implement a High-Availability Kubernetes cluster (HA) for deploying micro ONOS SDN controller as a set of microservices. We use a set of Raspberry pi as OpenFlow switches, Kubernetes workers, and vagrant virtual machines to implement the control plane. All Raspberrys are running as worker nodes and deployed via Ansible implementation. The control plane uses vagrant and virtualbox for functionalities and storage. To use this repo, follow the setup instructions below.  
+![This is an image](https://github.com/ricardopg1987/kubernetes-rpi/blob/main/onos.svg)
 
 # Resources
 **Control plane and etcd:**
